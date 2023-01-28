@@ -1,0 +1,30 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  SAM_ARTIFACT_BUCKET: ${{ secrets.ARTIFACT_BUCKET }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v2
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9.13
+      - run: pip install poetry
+      - run: make build
+      - run: tar cf layers.tar *
+      - uses: actions/upload-artifact@v3
+        with:
+          name: layers.tar
+          path: layers.tar
